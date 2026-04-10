@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Scorte - AZIENDA PROVA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5rem; margin-bottom: 5px; font-weight: 300; }
+        .header .subtitle { font-size: 1rem; opacity: 0.85; margin-bottom: 4px; }
+        .header .location { font-size: 0.9rem; opacity: 0.7; }
+
+        .firebase-status {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 10px; font-size: 0.85rem;
+            background: rgba(0,0,0,0.1); color: white;
+        }
+        .firebase-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #ffd700; animation: pulse 1.5s infinite;
+        }
+        .firebase-dot.connected { background: #28a745; animation: none; }
+        .firebase-dot.error { background: #dc3545; animation: none; }
+
+        .main-content { padding: 40px; }
+
+        .add-product-section {
+            background: #f8f9fa; border-radius: 15px; padding: 30px;
+            margin-bottom: 30px; border: 2px dashed #dee2e6; transition: all 0.3s ease;
+        }
+        .add-product-section:hover { border-color: #4facfe; background: #f0f8ff; }
+
+        .form-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px; margin-bottom: 20px;
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label {
+            font-weight: 600; color: #495057; margin-bottom: 8px;
+            font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .form-group input {
+            padding: 12px 15px; border: 2px solid #e9ecef;
+            border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;
+        }
+        .form-group input:focus { outline: none; border-color: #4facfe; box-shadow: 0 0 0 3px rgba(79,172,254,0.1); }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white; border: none; padding: 15px 30px; border-radius: 50px;
+            cursor: pointer; font-size: 1rem; font-weight: 600;
+            transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(79,172,254,0.3); }
+
+        .products-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px; margin-top: 30px;
+        }
+        .product-card {
+            background: white; border-radius: 15px; padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 2px solid #f8f9fa;
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .product-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .product-card.low-stock { border-color: #ff6b6b; background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%); }
+        .product-card.low-stock::before { background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%); }
+
+        .product-name {
+            font-size: 1.3rem; font-weight: 700; color: #2c3e50;
+            margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+        }
+        .product-description { font-size: 0.9rem; color: #6c757d; margin-bottom: 20px; font-style: italic; }
+
+        .status-indicator { width: 12px; height: 12px; border-radius: 50%; background: #28a745; flex-shrink: 0; }
+        .status-indicator.low { background: #dc3545; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .product-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat { text-align: center; padding: 15px; background: #f8f9fa; border-radius: 10px; }
+        .stat-label { font-size: 0.8rem; color: #6c757d; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: #2c3e50; }
+        .low-stock .stat-value { color: #dc3545; }
+
+        .alert {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            color: white; padding: 15px 20px; border-radius: 10px;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: 600;
+        }
+
+        .actions { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 15px; }
+        .btn-scarico, .btn-ricarico { padding: 12px 24px; font-size: 1rem; border-radius: 25px; width: 80%; text-align: center; }
+        .btn-rimuovi { padding: 8px 16px; font-size: 0.9rem; border-radius: 25px; width: 60%; text-align: center; }
+        .btn-danger { background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%); }
+        .btn-info { background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%); }
+        .btn-success { background: linear-gradient(135deg, #51cf66 0%, #2f9e44 100%); }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #6c757d; }
+        .empty-state-icon { font-size: 4rem; margin-bottom: 20px; opacity: 0.5; }
+
+        /* Log movimenti */
+        .log-section { margin-top: 40px; background: #f8f9fa; border-radius: 15px; padding: 25px; }
+        .log-section h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.3rem; }
+        .log-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .log-table th {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white; padding: 12px 15px; text-align: left;
+        }
+        .log-table th:first-child { border-radius: 8px 0 0 0; }
+        .log-table th:last-child { border-radius: 0 8px 0 0; }
+        .log-table td { padding: 10px 15px; border-bottom: 1px solid #dee2e6; }
+        .log-table tr:nth-child(even) td { background: #f1f3f5; }
+        .log-table tr:hover td { background: #e8f4ff; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+        .badge-scarico { background: #cce5ff; color: #004085; }
+        .badge-ricarico { background: #d4edda; color: #155724; }
+        .badge-aggiunta { background: #fff3cd; color: #856404; }
+        .badge-rimozione { background: #f8d7da; color: #721c24; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal h3 { color: #2c3e50; margin-bottom: 20px; font-size: 1.4rem; }
+        .modal input { width: 100%; padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 1.1rem; margin-bottom: 15px; text-align: center; }
+        .modal input:focus { outline: none; border-color: #4facfe; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 5px; }
+        .btn-cancel { background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .products-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2rem; }
+            .main-content { padding: 20px; }
+            .btn-scarico, .btn-ricarico { width: 90%; }
+            .btn-rimuovi { width: 70%; }
+            .log-table { font-size: 0.75rem; }
+            .log-table td, .log-table th { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 AZIENDA PROVA</h1>
+            <p class="subtitle">Sistema di Gestione Scorte</p>
+            <p class="location">📍 Magazzino Via Bianchi nr° 5</p>
+        </div>
+        <div class="firebase-status">
+            <div class="firebase-dot" id="firebaseDot"></div>
+            <span id="firebaseStatusText">Connessione in corso...</span>
+        </div>
+
+        <div class="main-content">
+            <div class="add-product-section">
+                <h2 style="margin-bottom:20px;color:#2c3e50;">➕ Aggiungi Nuovo Prodotto</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome Prodotto</label>
+                        <input type="text" id="productName" placeholder="Es: Etichetta Premium">
+                    </div>
+                    <div class="form-group">
+                        <label>Magazzino Iniziale</label>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <button type="button" onclick="adjustValue('initialStock',-1)" style="background:#dc3545;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">-</button>
+                            <input type="number" id="initialStock" value="0" min="0" style="text-align:center;width:80px;">
+                            <button type="button" onclick="adjustValue('initialStock',1)" style="background:#28a745;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Scorta Minima</label>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <button type="button" onclick="adjustValue('minStock',-1)" style="background:#dc3545;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">-</button>
+                            <input type="number" id="minStock" value="0" min="0" style="text-align:center;width:80px;">
+                            <button type="button" onclick="adjustValue('minStock',1)" style="background:#28a745;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Giacenza Calcolata</label>
+                        <input type="number" id="remaining" readonly style="background:#f8f9fa;color:#6c757d;text-align:center;">
+                    </div>
+                </div>
+                <button class="btn" onclick="addProduct()">Aggiungi Prodotto</button>
+            </div>
+
+            <div id="productsContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <h3>Nessun prodotto in inventario</h3>
+                    <p>Aggiungi il primo prodotto per iniziare il monitoraggio delle scorte</p>
+                </div>
+            </div>
+
+            <div class="log-section">
+                <h2>📋 Registro Movimenti</h2>
+                <div id="logContainer">
+                    <p style="color:#6c757d;text-align:center;padding:20px;">Nessun movimento registrato</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ricarico Magazzino -->
+    <div class="modal-overlay" id="modalRicarico">
+        <div class="modal">
+            <h3>📦 Ricarico Magazzino</h3>
+            <p style="color:#6c757d;margin-bottom:20px;" id="modalProductName"></p>
+            <label style="display:block;margin-bottom:8px;font-weight:600;color:#495057;">Password fornitore:</label>
+            <input type="password" id="modalPassword" placeholder="••••••••">
+            <label style="display:block;margin-bottom:8px;font-weight:600;color:#495057;">Quantità da aggiungere:</label>
+            <input type="number" id="modalQuantity" placeholder="0" min="1">
+            <div id="modalError" style="color:#dc3545;font-size:0.85rem;margin-bottom:10px;display:none;">❌ Password errata</div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Annulla</button>
+                <button class="btn btn-success" onclick="confirmRestock()" style="padding:12px 25px;">Conferma Ricarico</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        // ── CONFIGURAZIONE FIREBASE ──────────────────────────────────
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlFdl530aySEjZQVkwYngMI-ekkLEu9AM",
+            authDomain: "stabilimentoa-b46a3.firebaseapp.com",
+            databaseURL: "https://stabilimentoa-b46a3-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "stabilimentoa-b46a3",
+            storageBucket: "stabilimentoa-b46a3.firebasestorage.app",
+            messagingSenderId: "1024225985117",
+            appId: "1:1024225985117:web:a4e43203bdc1df77c103b4"
+        };
+
+        // ── PASSWORD FORNITORE (cambiala!) ───────────────────────────
+        const FORNITORE_PASSWORD = "fornitore2024";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const prodottiRef = ref(db, 'magazzino/prodotti');
+        const movimentiRef = ref(db, 'magazzino/movimenti');
+
+        let products = {};
+        let pendingRestockId = null;
+
+        // ── STATO CONNESSIONE ────────────────────────────────────────
+        const dot = document.getElementById('firebaseDot');
+        const statusText = document.getElementById('firebaseStatusText');
+
+        // ── ASCOLTA PRODOTTI IN TEMPO REALE ─────────────────────────
+        onValue(prodottiRef, (snapshot) => {
+            dot.className = 'firebase-dot connected';
+            statusText.textContent = '🟢 Connesso — dati aggiornati in tempo reale';
+            products = snapshot.val() || {};
+            renderProducts();
+        }, () => {
+            dot.className = 'firebase-dot error';
+            statusText.textContent = '🔴 Errore connessione Firebase';
+        });
+
+        // ── ASCOLTA MOVIMENTI IN TEMPO REALE ────────────────────────
+        onValue(movimentiRef, (snapshot) => {
+            renderLog(snapshot.val() || {});
+        });
+
+        // ── AGGIUNGI PRODOTTO ────────────────────────────────────────
+        window.addProduct = async function() {
+            const name = document.getElementById('productName').value.trim();
+            const initialStock = parseInt(document.getElementById('initialStock').value) || 0;
+            const minStock = parseInt(document.getElementById('minStock').value) || 0;
+            if (!name) { alert('⚠️ Inserire il nome del prodotto'); return; }
+            const newRef = push(prodottiRef);
+            await set(newRef, { id: newRef.key, name, initialStock, consumption: 0, remaining: initialStock, minStock });
+            await logMovimento('aggiunta', name, initialStock, `Magazzino iniziale: ${initialStock}`);
+            clearForm();
+        };
+
+        // ── SCARICO ──────────────────────────────────────────────────
+        window.incrementConsumption = async function(id) {
+            const p = products[id];
+            if (!p) return;
+            const newCons = (p.consumption || 0) + 1;
+            const newRem = Math.max(0, p.initialStock - newCons);
+            await set(ref(db, `magazzino/prodotti/${id}`), { ...p, consumption: newCons, remaining: newRem });
+            await logMovimento('scarico', p.name, 1, `Giacenza rimasta: ${newRem}`);
+        };
+
+        // ── RIMOZIONE ────────────────────────────────────────────────
+        window.removeProduct = async function(id) {
+            const p = products[id];
+            if (!confirm(`Sei sicuro di voler rimuovere "${p.name}"?`)) return;
+            await remove(ref(db, `magazzino/prodotti/${id}`));
+            await logMovimento('rimozione', p.name, 0, 'Prodotto rimosso dal magazzino');
+        };
+
+        // ── MODAL RICARICO ───────────────────────────────────────────
+        window.openRestock = function(id) {
+            pendingRestockId = id;
+            document.getElementById('modalProductName').textContent = products[id].name;
+            document.getElementById('modalPassword').value = '';
+            document.getElementById('modalQuantity').value = '';
+            document.getElementById('modalError').style.display = 'none';
+            document.getElementById('modalRicarico').classList.add('active');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('modalRicarico').classList.remove('active');
+            pendingRestockId = null;
+        };
+
+        window.confirmRestock = async function() {
+            const pwd = document.getElementById('modalPassword').value;
+            const qty = parseInt(document.getElementById('modalQuantity').value) || 0;
+            if (pwd !== FORNITORE_PASSWORD) {
+                document.getElementById('modalError').style.display = 'block';
+                return;
+            }
+            if (qty <= 0) { alert('⚠️ Inserire una quantità valida'); return; }
+            const p = products[pendingRestockId];
+            const newInitial = p.initialStock + qty;
+            const newRem = Math.max(0, newInitial - (p.consumption || 0));
+            await set(ref(db, `magazzino/prodotti/${pendingRestockId}`), { ...p, initialStock: newInitial, remaining: newRem });
+            await logMovimento('ricarico', p.name, qty, `Nuova giacenza: ${newRem}`);
+            closeModal();
+        };
+
+        // ── LOG ──────────────────────────────────────────────────────
+        async function logMovimento(tipo, prodotto, quantita, note) {
+            await set(push(movimentiRef), { tipo, prodotto, quantita, note, timestamp: new Date().toISOString() });
+        }
+
+        // ── RENDER PRODOTTI ──────────────────────────────────────────
+        function renderProducts() {
+            const container = document.getElementById('productsContainer');
+            const list = Object.values(products);
+            if (list.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📋</div><h3>Nessun prodotto in inventario</h3><p>Aggiungi il primo prodotto per iniziare il monitoraggio delle scorte</p></div>`;
+                return;
+            }
+            const badgeClass = { scarico: 'badge-scarico', ricarico: 'badge-ricarico', aggiunta: 'badge-aggiunta', rimozione: 'badge-rimozione' };
+            container.innerHTML = `<div class="products-grid">${list.map(p => {
+                const isLow = p.remaining < p.minStock;
+                return `
+                <div class="product-card ${isLow ? 'low-stock' : ''}">
+                    <div class="product-name">
+                        <span class="status-indicator ${isLow ? 'low' : ''}"></span>
+                        ${p.name}
+                    </div>
+                    <div class="product-description">Scorta minima: ${p.minStock}</div>
+                    ${isLow ? `<div class="alert"><span>⚠️</span><span>SCORTA SOTTO SOGLIA — RIORDINO NECESSARIO</span></div>` : ''}
+                    <div class="product-stats">
+                        <div class="stat"><div class="stat-label">Scarico</div><div class="stat-value">${p.consumption || 0}</div></div>
+                        <div class="stat"><div class="stat-label">Giacenza</div><div class="stat-value">${p.remaining}</div></div>
+                        <div class="stat"><div class="stat-label">Scorta Min</div><div class="stat-value">${p.minStock}</div></div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-scarico btn-info" onclick="incrementConsumption('${p.id}')">➕ Scarico</button>
+                        <button class="btn btn-ricarico btn-success" onclick="openRestock('${p.id}')">🔄 Ricarico Magazzino</button>
+                        <button class="btn btn-rimuovi btn-danger" onclick="removeProduct('${p.id}')">🗑️ Rimuovi</button>
+                    </div>
+                </div>`;
+            }).join('')}</div>`;
+        }
+
+        // ── RENDER LOG ───────────────────────────────────────────────
+        function renderLog(movimenti) {
+            const container = document.getElementById('logContainer');
+            const list = Object.values(movimenti).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (list.length === 0) {
+                container.innerHTML = '<p style="color:#6c757d;text-align:center;padding:20px;">Nessun movimento registrato</p>';
+                return;
+            }
+            const badgeMap = { scarico: 'badge-scarico', ricarico: 'badge-ricarico', aggiunta: 'badge-aggiunta', rimozione: 'badge-rimozione' };
+            container.innerHTML = `
+            <table class="log-table">
+                <thead><tr><th>Data / Ora</th><th>Tipo</th><th>Prodotto</th><th>Quantità</th><th>Note</th></tr></thead>
+                <tbody>${list.map(m => {
+                    const d = new Date(m.timestamp);
+                    const ds = d.toLocaleDateString('it-IT') + ' ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+                    return `<tr>
+                        <td>${ds}</td>
+                        <td><span class="badge ${badgeMap[m.tipo] || ''}">${m.tipo}</span></td>
+                        <td>${m.prodotto}</td>
+                        <td>${m.quantita > 0 ? m.quantita : '—'}</td>
+                        <td>${m.note || ''}</td>
+                    </tr>`;
+                }).join('')}</tbody>
+            </table>`;
+        }
+
+        // ── UTILITY ──────────────────────────────────────────────────
+        window.adjustValue = function(inputId, delta) {
+            const input = document.getElementById(inputId);
+            input.value = Math.max(0, (parseInt(input.value) || 0) + delta);
+            document.getElementById('remaining').value = parseInt(document.getElementById('initialStock').value) || 0;
+        };
+
+        document.getElementById('initialStock').addEventListener('input', () => {
+            document.getElementById('remaining').value = parseInt(document.getElementById('initialStock').value) || 0;
+        });
+
+        function clearForm() {
+            ['productName'].forEach(id => document.getElementById(id).value = '');
+            ['initialStock','minStock','remaining'].forEach(id => document.getElementById(id).value = '0');
+        }
+
+    </script>
+</body>
+</html>

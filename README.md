@@ -1,0 +1,2 @@
+# StabilimentoA
+Magazzino etichette

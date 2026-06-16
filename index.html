@@ -28,10 +28,29 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
+        }
+        .header-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            height: 70px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .header h1 { font-size: 2.5rem; margin-bottom: 5px; font-weight: 300; }
         .header .subtitle { font-size: 1rem; opacity: 0.85; margin-bottom: 4px; }
         .header .location { font-size: 0.9rem; opacity: 0.7; }
+
+        .mode-badge {
+            display: inline-block; margin-top: 10px; padding: 5px 15px;
+            border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .mode-badge.operatore { background: rgba(255,255,255,0.2); }
+        .mode-badge.gestore { background: rgba(255,215,0,0.4); color: #fff; }
 
         .firebase-status {
             display: flex; align-items: center; justify-content: center;
@@ -47,6 +66,57 @@
 
         .main-content { padding: 40px; }
 
+        /* Schermata accesso */
+        .access-screen {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 60vh; text-align: center;
+            padding: 20px;
+        }
+        .access-screen h2 { color: #2c3e50; margin-bottom: 10px; font-size: 1.8rem; }
+        .access-screen p { color: #6c757d; margin-bottom: 30px; max-width: 400px; }
+        .pin-input {
+            font-size: 2rem; text-align: center; letter-spacing: 10px;
+            width: 220px; padding: 15px; border: 2px solid #e9ecef;
+            border-radius: 15px; margin-bottom: 20px;
+        }
+        .pin-input:focus { outline: none; border-color: #4facfe; }
+        .access-error {
+            color: #dc3545; font-size: 0.9rem; margin-bottom: 15px; display: none;
+        }
+        .access-divider {
+            display: flex; align-items: center; gap: 15px; margin: 30px 0;
+            color: #adb5bd; font-size: 0.85rem; text-transform: uppercase;
+            letter-spacing: 1px; width: 100%; max-width: 300px;
+        }
+        .access-divider::before, .access-divider::after {
+            content: ''; flex: 1; height: 1px; background: #e9ecef;
+        }
+        .btn-gestore-login {
+            background: none; border: 2px solid #dee2e6; color: #6c757d;
+            padding: 12px 30px; border-radius: 25px; cursor: pointer;
+            font-size: 0.95rem; transition: all 0.3s ease;
+        }
+        .btn-gestore-login:hover { border-color: #4facfe; color: #4facfe; }
+
+        /* Selezione magazzino gestore */
+        .warehouse-select {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 60vh; text-align: center; padding: 20px;
+        }
+        .warehouse-select h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.8rem; }
+        .warehouse-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px; max-width: 700px; width: 100%;
+        }
+        .warehouse-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white; border: none; padding: 20px 15px; border-radius: 15px;
+            cursor: pointer; font-size: 1.1rem; font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .warehouse-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(79,172,254,0.4); }
+
+        /* Sezione aggiungi prodotto */
         .add-product-section {
             background: #f8f9fa; border-radius: 15px; padding: 30px;
             margin-bottom: 30px; border: 2px dashed #dee2e6; transition: all 0.3s ease;
@@ -58,15 +128,20 @@
             gap: 20px; margin-bottom: 20px;
         }
         .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: 1 / -1; }
         .form-group label {
             font-weight: 600; color: #495057; margin-bottom: 8px;
             font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .form-group input {
+        .form-group input, .form-group textarea {
             padding: 12px 15px; border: 2px solid #e9ecef;
             border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;
+            font-family: inherit;
         }
-        .form-group input:focus { outline: none; border-color: #4facfe; box-shadow: 0 0 0 3px rgba(79,172,254,0.1); }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none; border-color: #4facfe; box-shadow: 0 0 0 3px rgba(79,172,254,0.1);
+        }
 
         .btn {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
@@ -131,14 +206,16 @@
         .log-section h2 { color: #2c3e50; font-size: 1.3rem; }
         .btn-cancella-storico { background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; }
         .btn-cancella-storico:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,107,107,0.4); }
-        .log-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .log-table-wrapper { overflow-x: auto; }
+        .log-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 800px; }
         .log-table th {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white; padding: 12px 15px; text-align: left;
+            color: white; padding: 12px 15px; text-align: left; white-space: nowrap;
         }
         .log-table th:first-child { border-radius: 8px 0 0 0; }
         .log-table th:last-child { border-radius: 0 8px 0 0; }
         .log-table td { padding: 10px 15px; border-bottom: 1px solid #dee2e6; }
+        .log-table td.note-gestore { max-width: 250px; white-space: pre-wrap; word-break: break-word; }
         .log-table tr:nth-child(even) td { background: #f1f3f5; }
         .log-table tr:hover td { background: #e8f4ff; }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
@@ -147,6 +224,15 @@
         .badge-aggiunta { background: #fff3cd; color: #856404; }
         .badge-rimozione { background: #f8d7da; color: #721c24; }
 
+        /* Pulsanti accesso/uscita discreti */
+        .gestore-access { text-align: center; padding: 30px 0 10px 0; }
+        .btn-gestore-access {
+            background: none; border: 1px solid #dee2e6; color: #adb5bd;
+            padding: 8px 20px; border-radius: 20px; cursor: pointer;
+            font-size: 0.78rem; transition: all 0.3s ease;
+        }
+        .btn-gestore-access:hover { border-color: #4facfe; color: #4facfe; }
+
         /* Modal */
         .modal-overlay {
             display: none; position: fixed; inset: 0;
@@ -154,12 +240,26 @@
             align-items: center; justify-content: center;
         }
         .modal-overlay.active { display: flex; }
-        .modal { background: white; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal { background: white; border-radius: 20px; padding: 40px; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         .modal h3 { color: #2c3e50; margin-bottom: 20px; font-size: 1.4rem; }
-        .modal input { width: 100%; padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 1.1rem; margin-bottom: 15px; text-align: center; }
-        .modal input:focus { outline: none; border-color: #4facfe; }
+        .modal input, .modal textarea {
+            width: 100%; padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 10px;
+            font-size: 1.1rem; margin-bottom: 15px; text-align: center; font-family: inherit;
+        }
+        .modal textarea { text-align: left; resize: vertical; min-height: 90px; font-size: 0.95rem; }
+        .modal label.field-label { display: block; margin-bottom: 8px; font-weight: 600; color: #495057; text-align: left; }
+        .modal input:focus, .modal textarea:focus { outline: none; border-color: #4facfe; }
         .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 5px; }
         .btn-cancel { background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-top: 1px solid #f1f3f5;
+        }
 
         @media (max-width: 768px) {
             .form-grid { grid-template-columns: 1fr; }
@@ -172,13 +272,16 @@
             .log-table td, .log-table th { padding: 8px; }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <img class="header-logo" src="data:image/png;base64,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" alt="MZ Office">
             <h1>📦 AZIENDA PROVA</h1>
             <p class="subtitle">Sistema di Gestione Scorte</p>
-            <p class="location">📍 Magazzino Via Bianchi nr° 5</p>
+            <p class="location" id="locationLabel">📍 Seleziona magazzino</p>
+            <span class="mode-badge operatore" id="modeBadge" style="display:none;">👤 Modalità Operatore</span>
         </div>
         <div class="firebase-status">
             <div class="firebase-dot" id="firebaseDot"></div>
@@ -186,53 +289,107 @@
         </div>
 
         <div class="main-content">
-            <div class="add-product-section">
-                <h2 style="margin-bottom:20px;color:#2c3e50;">➕ Aggiungi Nuovo Prodotto</h2>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Nome Prodotto</label>
-                        <input type="text" id="productName" placeholder="Es: Etichetta Premium">
-                    </div>
-                    <div class="form-group">
-                        <label>Magazzino Iniziale</label>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <button type="button" onclick="adjustValue('initialStock',-1)" style="background:#dc3545;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">-</button>
-                            <input type="number" id="initialStock" value="0" min="0" style="text-align:center;width:80px;">
-                            <button type="button" onclick="adjustValue('initialStock',1)" style="background:#28a745;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">+</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Scorta Minima</label>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <button type="button" onclick="adjustValue('minStock',-1)" style="background:#dc3545;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">-</button>
-                            <input type="number" id="minStock" value="0" min="0" style="text-align:center;width:80px;">
-                            <button type="button" onclick="adjustValue('minStock',1)" style="background:#28a745;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">+</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Giacenza Calcolata</label>
-                        <input type="number" id="remaining" readonly style="background:#f8f9fa;color:#6c757d;text-align:center;">
-                    </div>
-                </div>
-                <button class="btn" onclick="addProduct()">Aggiungi Prodotto</button>
+
+            <!-- SCHERMATA DI ACCESSO -->
+            <div class="access-screen" id="accessScreen">
+                <h2>🔐 Accesso Magazzino</h2>
+                <p>Inserisci il PIN del tuo magazzino per accedere alla gestione delle etichette.</p>
+                <input type="password" inputmode="numeric" maxlength="4" class="pin-input" id="pinInput" placeholder="••••" onkeydown="if(event.key==='Enter') checkPin()">
+                <div class="access-error" id="pinError">❌ PIN non valido</div>
+                <button class="btn" onclick="checkPin()">Accedi</button>
+                <div class="access-divider">oppure</div>
+                <button class="btn-gestore-login" onclick="openModalGestore()">⚙️ Accesso Gestore</button>
             </div>
 
-            <div id="productsContainer">
-                <div class="empty-state">
-                    <div class="empty-state-icon">📋</div>
-                    <h3>Nessun prodotto in inventario</h3>
-                    <p>Aggiungi il primo prodotto per iniziare il monitoraggio delle scorte</p>
+            <!-- SELEZIONE MAGAZZINO (GESTORE) -->
+            <div class="warehouse-select" id="warehouseSelect" style="display:none;">
+                <h2>⚙️ Seleziona Magazzino</h2>
+                <div class="warehouse-grid" id="warehouseGrid"></div>
+                <div style="margin-top:30px;">
+                    <button class="btn-gestore-access" onclick="location.reload()">← Torna alla schermata principale</button>
                 </div>
             </div>
 
-            <div class="log-section">
-                <div class="log-header">
-                    <h2>📋 Registro Movimenti</h2>
-                    <button class="btn-cancella-storico" onclick="cancellaStorico()">🗑️ Cancella Storico</button>
+            <!-- CONTENUTO APP (dopo accesso) -->
+            <div id="appContent" style="display:none;">
+
+                <div class="add-product-section" id="addProductSection" style="display:none;">
+                    <h2 style="margin-bottom:20px;color:#2c3e50;">➕ Aggiungi Nuovo Prodotto</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nome Prodotto</label>
+                            <input type="text" id="productName" placeholder="Es: Etichetta Premium">
+                        </div>
+                        <div class="form-group">
+                            <label>Magazzino Iniziale</label>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <button type="button" onclick="adjustValue('initialStock',-1)" style="background:#dc3545;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">-</button>
+                                <input type="number" id="initialStock" value="0" min="0" style="text-align:center;width:80px;">
+                                <button type="button" onclick="adjustValue('initialStock',1)" style="background:#28a745;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Scorta Minima</label>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <button type="button" onclick="adjustValue('minStock',-1)" style="background:#dc3545;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">-</button>
+                                <input type="number" id="minStock" value="0" min="0" style="text-align:center;width:80px;">
+                                <button type="button" onclick="adjustValue('minStock',1)" style="background:#28a745;color:white;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Giacenza Calcolata</label>
+                            <input type="number" id="remaining" readonly style="background:#f8f9fa;color:#6c757d;text-align:center;">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Note Gestore (es. numero DDT e data)</label>
+                            <textarea id="addNoteGestore" placeholder="Es: DDT n. 1234 del 15/06/2026 - fornitura iniziale"></textarea>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="addProduct()">Aggiungi Prodotto</button>
                 </div>
-                <div id="logContainer">
-                    <p style="color:#6c757d;text-align:center;padding:20px;">Nessun movimento registrato</p>
+
+                <div id="productsContainer"></div>
+
+                <div class="log-section" id="logSection" style="display:none;">
+                    <div class="log-header">
+                        <h2>📋 Registro Movimenti</h2>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <button class="btn-cancella-storico" style="background:linear-gradient(135deg,#6c757d 0%,#495057 100%);" onclick="logoutGestore()">✕ Esci / Cambia magazzino</button>
+                            <button class="btn-cancella-storico" style="background:linear-gradient(135deg,#51cf66 0%,#2f9e44 100%);" onclick="esportaExcel()">📥 Esporta Excel</button>
+                            <button class="btn-cancella-storico" onclick="cancellaStorico()">🗑️ Cancella Storico</button>
+                        </div>
+                    </div>
+                    <div id="logContainer">
+                        <p style="color:#6c757d;text-align:center;padding:20px;">Nessun movimento registrato</p>
+                    </div>
                 </div>
+
+                <div class="gestore-access" id="gestoreAccessDiv" style="display:none;">
+                    <button class="btn-gestore-access" onclick="openModalGestore()">⚙️ Accesso Gestore</button>
+                </div>
+
+                <div class="gestore-access" id="operatoreLogoutDiv" style="display:none;">
+                    <button class="btn-gestore-access" onclick="logoutOperatore()">✕ Esci</button>
+                </div>
+
+            </div>
+        </div>
+        <div class="footer">
+            <strong>MZ Office</strong> — Via Celante, n°14, Vittorio Veneto — Tel. 0438 553804
+        </div>
+    </div>
+
+    <!-- Modal Accesso Gestore -->
+    <div class="modal-overlay" id="modalGestore">
+        <div class="modal">
+            <h3>⚙️ Accesso Gestore</h3>
+            <p style="color:#6c757d;margin-bottom:20px;">Inserisci la password per accedere alla modalità gestore.</p>
+            <label class="field-label">Password:</label>
+            <input type="password" id="modalGestorePassword" placeholder="••••••••" onkeydown="if(event.key==='Enter') confirmGestore()">
+            <div id="modalGestoreError" style="color:#dc3545;font-size:0.85rem;margin-bottom:10px;display:none;">❌ Password errata</div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModalGestore()">Annulla</button>
+                <button class="btn" onclick="confirmGestore()" style="padding:12px 25px;">Entra</button>
             </div>
         </div>
     </div>
@@ -242,11 +399,10 @@
         <div class="modal">
             <h3>📦 Ricarico Magazzino</h3>
             <p style="color:#6c757d;margin-bottom:20px;" id="modalProductName"></p>
-            <label style="display:block;margin-bottom:8px;font-weight:600;color:#495057;">Password fornitore:</label>
-            <input type="password" id="modalPassword" placeholder="••••••••">
-            <label style="display:block;margin-bottom:8px;font-weight:600;color:#495057;">Quantità da aggiungere:</label>
+            <label class="field-label">Quantità da aggiungere:</label>
             <input type="number" id="modalQuantity" placeholder="0" min="1">
-            <div id="modalError" style="color:#dc3545;font-size:0.85rem;margin-bottom:10px;display:none;">❌ Password errata</div>
+            <label class="field-label">Note Gestore (es. numero DDT e data)</label>
+            <textarea id="modalNoteGestore" placeholder="Es: DDT n. 1234 del 15/06/2026"></textarea>
             <div class="modal-buttons">
                 <button class="btn-cancel" onclick="closeModal()">Annulla</button>
                 <button class="btn btn-success" onclick="confirmRestock()" style="padding:12px 25px;">Conferma Ricarico</button>
@@ -259,9 +415,6 @@
         <div class="modal">
             <h3>🗑️ Cancella Storico Movimenti</h3>
             <p style="color:#6c757d;margin-bottom:20px;">Questa operazione eliminerà definitivamente tutti i movimenti registrati. I prodotti e le giacenze rimarranno invariati.</p>
-            <label style="display:block;margin-bottom:8px;font-weight:600;color:#495057;">Password fornitore:</label>
-            <input type="password" id="modalStoricoPassword" placeholder="••••••••">
-            <div id="modalStoricoError" style="color:#dc3545;font-size:0.85rem;margin-bottom:10px;display:none;">❌ Password errata</div>
             <div class="modal-buttons">
                 <button class="btn-cancel" onclick="closeModalStorico()">Annulla</button>
                 <button class="btn btn-danger" onclick="confirmCancellaStorico()" style="padding:12px 25px;">Cancella tutto</button>
@@ -284,46 +437,188 @@
             appId: "1:1024225985117:web:a4e43203bdc1df77c103b4"
         };
 
-        // ── PASSWORD FORNITORE (cambiala!) ───────────────────────────
+        // ── PASSWORD GESTORE ─────────────────────────────────────────
         const FORNITORE_PASSWORD = "fornitore2024";
+
+        // ── ELENCO MAGAZZINI E PIN ────────────────────────────────────
+        // Per modificare un PIN o un nome, cambia i valori qui sotto.
+        const MAGAZZINI = [
+            { id: 'A', nome: 'Magazzino A', pin: '1001' },
+            { id: 'B', nome: 'Magazzino B', pin: '1002' },
+            { id: 'C', nome: 'Magazzino C', pin: '1003' },
+            { id: 'D', nome: 'Magazzino D', pin: '1004' },
+            { id: 'E', nome: 'Magazzino E', pin: '1005' },
+            { id: 'F', nome: 'Magazzino F', pin: '1006' },
+            { id: 'G', nome: 'Magazzino G', pin: '1007' },
+            { id: 'H', nome: 'Magazzino H', pin: '1008' },
+            { id: 'I', nome: 'Magazzino I', pin: '1009' },
+            { id: 'J', nome: 'Magazzino J', pin: '1010' },
+            { id: 'K', nome: 'Magazzino K', pin: '1011' },
+            { id: 'L', nome: 'Magazzino L', pin: '1012' },
+            { id: 'M', nome: 'Magazzino M', pin: '1013' },
+            { id: 'N', nome: 'Magazzino N', pin: '1014' },
+            { id: 'O', nome: 'Magazzino O', pin: '1015' }
+        ];
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const prodottiRef = ref(db, 'magazzino/prodotti');
-        const movimentiRef = ref(db, 'magazzino/movimenti');
+
+        // ── CONFIGURAZIONE EMAILJS (notifica scorta minima) ──────────
+        const EMAILJS_PUBLIC_KEY = "0po7jJ9phjvCaegdk";
+        const EMAILJS_SERVICE_ID = "service_xq72onm";
+        const EMAILJS_TEMPLATE_ID = "template_z873fbj";
+        const EMAIL_DESTINATARIO = "aurboot@gmail.com"; // ← cambia con la mail del fornitore
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+
+        function inviaNotificaScortaMinima(prodotto, giacenza) {
+            const params = {
+                magazzino: currentMagazzino.nome,
+                prodotto: prodotto.name,
+                giacenza: giacenza,
+                scorta_minima: prodotto.minStock,
+                data: new Date().toLocaleString('it-IT'),
+                to_email: EMAIL_DESTINATARIO
+            };
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
+                .then(() => console.log('✅ Email di avviso inviata'))
+                .catch((err) => console.error('❌ Errore invio email:', err));
+        }
+
 
         let products = {};
         let pendingRestockId = null;
+        let isGestore = false;
+        let currentMagazzino = null; // { id, nome, pin }
+        let prodottiRef = null;
+        let movimentiRef = null;
+        let unsubProdotti = null;
+        let unsubMovimenti = null;
 
         // ── STATO CONNESSIONE ────────────────────────────────────────
         const dot = document.getElementById('firebaseDot');
         const statusText = document.getElementById('firebaseStatusText');
+        dot.className = 'firebase-dot connected';
+        statusText.textContent = '🟢 Connesso';
 
-        // ── ASCOLTA PRODOTTI IN TEMPO REALE ─────────────────────────
-        onValue(prodottiRef, (snapshot) => {
-            dot.className = 'firebase-dot connected';
-            statusText.textContent = '🟢 Connesso — dati aggiornati in tempo reale';
-            products = snapshot.val() || {};
+        // ── ACCESSO OPERATORE TRAMITE PIN ─────────────────────────────
+        window.checkPin = function() {
+            const pin = document.getElementById('pinInput').value.trim();
+            const magazzino = MAGAZZINI.find(m => m.pin === pin);
+            if (!magazzino) {
+                document.getElementById('pinError').style.display = 'block';
+                return;
+            }
+            document.getElementById('pinError').style.display = 'none';
+            isGestore = false;
+            selezionaMagazzino(magazzino);
+            document.getElementById('accessScreen').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+            document.getElementById('operatoreLogoutDiv').style.display = 'block';
+            document.getElementById('modeBadge').style.display = 'inline-block';
+            document.getElementById('modeBadge').textContent = '👤 Modalità Operatore';
+            document.getElementById('modeBadge').className = 'mode-badge operatore';
+        };
+
+        window.logoutOperatore = function() {
+            location.reload();
+        };
+
+        // ── ACCESSO GESTORE ────────────────────────────────────────────
+        window.openModalGestore = function() {
+            document.getElementById('modalGestorePassword').value = '';
+            document.getElementById('modalGestoreError').style.display = 'none';
+            document.getElementById('modalGestore').classList.add('active');
+            setTimeout(() => document.getElementById('modalGestorePassword').focus(), 100);
+        };
+
+        window.closeModalGestore = function() {
+            document.getElementById('modalGestore').classList.remove('active');
+        };
+
+        window.confirmGestore = function() {
+            const pwd = document.getElementById('modalGestorePassword').value;
+            if (pwd !== FORNITORE_PASSWORD) {
+                document.getElementById('modalGestoreError').style.display = 'block';
+                return;
+            }
+            isGestore = true;
+            closeModalGestore();
+            mostraSelezioneMagazzino();
+        };
+
+        function mostraSelezioneMagazzino() {
+            document.getElementById('accessScreen').style.display = 'none';
+            document.getElementById('appContent').style.display = 'none';
+            document.getElementById('warehouseSelect').style.display = 'flex';
+            const grid = document.getElementById('warehouseGrid');
+            grid.innerHTML = MAGAZZINI.map(m =>
+                `<button class="warehouse-btn" onclick='selezionaMagazzinoGestore(${JSON.stringify(m)})'>${m.nome}</button>`
+            ).join('');
+        }
+
+        window.selezionaMagazzinoGestore = function(magazzino) {
+            document.getElementById('warehouseSelect').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+            selezionaMagazzino(magazzino);
+            attivaGestore();
+        };
+
+        // ── SELEZIONE MAGAZZINO: imposta i riferimenti Firebase ────────
+        function selezionaMagazzino(magazzino) {
+            currentMagazzino = magazzino;
+            document.getElementById('locationLabel').textContent = `📍 ${magazzino.nome}`;
+
+            if (unsubProdotti) unsubProdotti();
+            if (unsubMovimenti) unsubMovimenti();
+
+            prodottiRef = ref(db, `magazzini/${magazzino.id}/prodotti`);
+            movimentiRef = ref(db, `magazzini/${magazzino.id}/movimenti`);
+
+            unsubProdotti = onValue(prodottiRef, (snapshot) => {
+                products = snapshot.val() || {};
+                renderProducts();
+            });
+
+            unsubMovimenti = onValue(movimentiRef, (snapshot) => {
+                window._movimentiCache = snapshot.val() || {};
+                renderLog(window._movimentiCache);
+            });
+        }
+
+        // ── GESTIONE MODALITÀ GESTORE ────────────────────────────────
+        function attivaGestore() {
+            document.getElementById('addProductSection').style.display = 'block';
+            document.getElementById('logSection').style.display = 'block';
+            document.getElementById('gestoreAccessDiv').style.display = 'none';
+            document.getElementById('operatoreLogoutDiv').style.display = 'none';
+            document.getElementById('modeBadge').style.display = 'inline-block';
+            document.getElementById('modeBadge').textContent = '⚙️ Modalità Gestore';
+            document.getElementById('modeBadge').className = 'mode-badge gestore';
             renderProducts();
-        }, () => {
-            dot.className = 'firebase-dot error';
-            statusText.textContent = '🔴 Errore connessione Firebase';
-        });
+        }
 
-        // ── ASCOLTA MOVIMENTI IN TEMPO REALE ────────────────────────
-        onValue(movimentiRef, (snapshot) => {
-            renderLog(snapshot.val() || {});
-        });
+        window.logoutGestore = function() {
+            // Torna alla selezione magazzino del gestore
+            if (unsubProdotti) unsubProdotti();
+            if (unsubMovimenti) unsubMovimenti();
+            document.getElementById('appContent').style.display = 'none';
+            document.getElementById('addProductSection').style.display = 'none';
+            document.getElementById('logSection').style.display = 'none';
+            document.getElementById('modeBadge').style.display = 'none';
+            document.getElementById('locationLabel').textContent = '📍 Seleziona magazzino';
+            mostraSelezioneMagazzino();
+        };
 
         // ── AGGIUNGI PRODOTTO ────────────────────────────────────────
         window.addProduct = async function() {
             const name = document.getElementById('productName').value.trim();
             const initialStock = parseInt(document.getElementById('initialStock').value) || 0;
             const minStock = parseInt(document.getElementById('minStock').value) || 0;
+            const noteGestore = document.getElementById('addNoteGestore').value.trim();
             if (!name) { alert('⚠️ Inserire il nome del prodotto'); return; }
             const newRef = push(prodottiRef);
             await set(newRef, { id: newRef.key, name, initialStock, consumption: 0, remaining: initialStock, minStock });
-            await logMovimento('aggiunta', name, initialStock, `Magazzino iniziale: ${initialStock}`);
+            await logMovimento('aggiunta', name, initialStock, `Magazzino iniziale: ${initialStock}`, noteGestore);
             clearForm();
         };
 
@@ -333,25 +628,37 @@
             if (!p) return;
             const newCons = (p.consumption || 0) + 1;
             const newRem = Math.max(0, p.initialStock - newCons);
-            await set(ref(db, `magazzino/prodotti/${id}`), { ...p, consumption: newCons, remaining: newRem });
-            await logMovimento('scarico', p.name, 1, `Giacenza rimasta: ${newRem}`);
+            const oraSottoSoglia = newRem < p.minStock;
+            const aggiornato = { ...p, consumption: newCons, remaining: newRem };
+
+            // Invia email solo se scende sotto soglia e l'avviso non è già stato inviato
+            const inviaEmail = oraSottoSoglia && !p.avvisoInviato;
+            if (inviaEmail) {
+                aggiornato.avvisoInviato = true;
+            }
+
+            await set(ref(db, `magazzini/${currentMagazzino.id}/prodotti/${id}`), aggiornato);
+            await logMovimento('scarico', p.name, 1, `Giacenza rimasta: ${newRem}`, '');
+
+            if (inviaEmail) {
+                inviaNotificaScortaMinima(p, newRem);
+            }
         };
 
         // ── RIMOZIONE ────────────────────────────────────────────────
         window.removeProduct = async function(id) {
             const p = products[id];
             if (!confirm(`Sei sicuro di voler rimuovere "${p.name}"?`)) return;
-            await remove(ref(db, `magazzino/prodotti/${id}`));
-            await logMovimento('rimozione', p.name, 0, 'Prodotto rimosso dal magazzino');
+            await remove(ref(db, `magazzini/${currentMagazzino.id}/prodotti/${id}`));
+            await logMovimento('rimozione', p.name, 0, 'Prodotto rimosso dal magazzino', '');
         };
 
         // ── MODAL RICARICO ───────────────────────────────────────────
         window.openRestock = function(id) {
             pendingRestockId = id;
             document.getElementById('modalProductName').textContent = products[id].name;
-            document.getElementById('modalPassword').value = '';
             document.getElementById('modalQuantity').value = '';
-            document.getElementById('modalError').style.display = 'none';
+            document.getElementById('modalNoteGestore').value = '';
             document.getElementById('modalRicarico').classList.add('active');
         };
 
@@ -361,26 +668,25 @@
         };
 
         window.confirmRestock = async function() {
-            const pwd = document.getElementById('modalPassword').value;
             const qty = parseInt(document.getElementById('modalQuantity').value) || 0;
-            if (pwd !== FORNITORE_PASSWORD) {
-                document.getElementById('modalError').style.display = 'block';
-                return;
-            }
+            const noteGestore = document.getElementById('modalNoteGestore').value.trim();
             if (qty <= 0) { alert('⚠️ Inserire una quantità valida'); return; }
             const p = products[pendingRestockId];
             const newInitial = p.initialStock + qty;
             const newRem = Math.max(0, newInitial - (p.consumption || 0));
-            await set(ref(db, `magazzino/prodotti/${pendingRestockId}`), { ...p, initialStock: newInitial, remaining: newRem });
-            await logMovimento('ricarico', p.name, qty, `Nuova giacenza: ${newRem}`);
+            const aggiornato = { ...p, initialStock: newInitial, remaining: newRem };
+            // Se torna sopra soglia, resetta il flag così un futuro calo sotto soglia genera un nuovo avviso
+            if (newRem >= p.minStock) {
+                aggiornato.avvisoInviato = false;
+            }
+            await set(ref(db, `magazzini/${currentMagazzino.id}/prodotti/${pendingRestockId}`), aggiornato);
+            await logMovimento('ricarico', p.name, qty, `Nuova giacenza: ${newRem}`, noteGestore);
             closeModal();
         };
 
         // ── CANCELLA STORICO ─────────────────────────────────────────
         window.cancellaStorico = function() {
             document.getElementById('modalStorico').classList.add('active');
-            document.getElementById('modalStoricoPassword').value = '';
-            document.getElementById('modalStoricoError').style.display = 'none';
         };
 
         window.closeModalStorico = function() {
@@ -388,18 +694,44 @@
         };
 
         window.confirmCancellaStorico = async function() {
-            const pwd = document.getElementById('modalStoricoPassword').value;
-            if (pwd !== FORNITORE_PASSWORD) {
-                document.getElementById('modalStoricoError').style.display = 'block';
-                return;
-            }
             await remove(movimentiRef);
             closeModalStorico();
         };
 
+        // ── ESPORTA EXCEL ────────────────────────────────────────────
+        window.esportaExcel = function() {
+            const movimenti = Object.values(window._movimentiCache || {});
+            if (movimenti.length === 0) { alert('⚠️ Nessun movimento da esportare'); return; }
+
+            const list = movimenti.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            let csv = 'Data;Ora;Tipo;Prodotto;Quantità;Note;Note Gestore\n';
+            list.forEach(m => {
+                const d = new Date(m.timestamp);
+                const data = d.toLocaleDateString('it-IT');
+                const ora = d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+                const tipo = m.tipo || '';
+                const prodotto = (m.prodotto || '').replace(/;/g, ',');
+                const quantita = m.quantita > 0 ? m.quantita : '';
+                const note = (m.note || '').replace(/;/g, ',').replace(/\n/g, ' ');
+                const noteGestore = (m.noteGestore || '').replace(/;/g, ',').replace(/\n/g, ' ');
+                csv += `${data};${ora};${tipo};${prodotto};${quantita};${note};${noteGestore}\n`;
+            });
+
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const oggi = new Date().toLocaleDateString('it-IT').replace(/\//g,'-');
+            a.href = url;
+            a.download = `Movimenti_${currentMagazzino.nome.replace(/\s+/g,'_')}_${oggi}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
         // ── LOG ──────────────────────────────────────────────────────
-        async function logMovimento(tipo, prodotto, quantita, note) {
-            await set(push(movimentiRef), { tipo, prodotto, quantita, note, timestamp: new Date().toISOString() });
+        async function logMovimento(tipo, prodotto, quantita, note, noteGestore) {
+            await set(push(movimentiRef), { tipo, prodotto, quantita, note, noteGestore: noteGestore || '', timestamp: new Date().toISOString() });
         }
 
         // ── RENDER PRODOTTI ──────────────────────────────────────────
@@ -410,7 +742,6 @@
                 container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📋</div><h3>Nessun prodotto in inventario</h3><p>Aggiungi il primo prodotto per iniziare il monitoraggio delle scorte</p></div>`;
                 return;
             }
-            const badgeClass = { scarico: 'badge-scarico', ricarico: 'badge-ricarico', aggiunta: 'badge-aggiunta', rimozione: 'badge-rimozione' };
             container.innerHTML = `<div class="products-grid">${list.map(p => {
                 const isLow = p.remaining < p.minStock;
                 return `
@@ -428,8 +759,10 @@
                     </div>
                     <div class="actions">
                         <button class="btn btn-scarico btn-info" onclick="incrementConsumption('${p.id}')">➕ Scarico</button>
+                        ${isGestore ? `
                         <button class="btn btn-ricarico btn-success" onclick="openRestock('${p.id}')">🔄 Ricarico Magazzino</button>
                         <button class="btn btn-rimuovi btn-danger" onclick="removeProduct('${p.id}')">🗑️ Rimuovi</button>
+                        ` : ''}
                     </div>
                 </div>`;
             }).join('')}</div>`;
@@ -445,8 +778,9 @@
             }
             const badgeMap = { scarico: 'badge-scarico', ricarico: 'badge-ricarico', aggiunta: 'badge-aggiunta', rimozione: 'badge-rimozione' };
             container.innerHTML = `
+            <div class="log-table-wrapper">
             <table class="log-table">
-                <thead><tr><th>Data / Ora</th><th>Tipo</th><th>Prodotto</th><th>Quantità</th><th>Note</th></tr></thead>
+                <thead><tr><th>Data / Ora</th><th>Tipo</th><th>Prodotto</th><th>Quantità</th><th>Note</th><th>Note Gestore</th></tr></thead>
                 <tbody>${list.map(m => {
                     const d = new Date(m.timestamp);
                     const ds = d.toLocaleDateString('it-IT') + ' ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
@@ -456,9 +790,11 @@
                         <td>${m.prodotto}</td>
                         <td>${m.quantita > 0 ? m.quantita : '—'}</td>
                         <td>${m.note || ''}</td>
+                        <td class="note-gestore">${m.noteGestore || ''}</td>
                     </tr>`;
                 }).join('')}</tbody>
-            </table>`;
+            </table>
+            </div>`;
         }
 
         // ── UTILITY ──────────────────────────────────────────────────
@@ -473,7 +809,8 @@
         });
 
         function clearForm() {
-            ['productName'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('productName').value = '';
+            document.getElementById('addNoteGestore').value = '';
             ['initialStock','minStock','remaining'].forEach(id => document.getElementById(id).value = '0');
         }
 

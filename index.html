@@ -272,7 +272,7 @@
             .log-table td, .log-table th { padding: 8px; }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -468,7 +468,7 @@
         const EMAILJS_SERVICE_ID = "service_xq72onm";
         const EMAILJS_TEMPLATE_ID = "template_z873fbj";
         const EMAIL_DESTINATARIO = "aurboot@gmail.com"; // ← cambia con la mail del fornitore
-        emailjs.init(EMAILJS_PUBLIC_KEY);
+        window.emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
         function inviaNotificaScortaMinima(prodotto, giacenza) {
             const params = {
@@ -479,9 +479,9 @@
                 data: new Date().toLocaleString('it-IT'),
                 to_email: EMAIL_DESTINATARIO
             };
-            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
-                .then(() => console.log('✅ Email di avviso inviata'))
-                .catch((err) => console.error('❌ Errore invio email:', err));
+            window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
+                .then((res) => console.log('✅ Email di avviso inviata', res))
+                .catch((err) => console.error('❌ Errore invio email:', JSON.stringify(err), err));
         }
 
 
